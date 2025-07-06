@@ -53,7 +53,7 @@ public class GetBooksHandlerTests
         };
 
         var mockBooksRepository = new Mock<IBooksRepository>();
-        mockBooksRepository.Setup(r => r.GetBookByIdAsync(id)).ReturnsAsync(mockBook);
+        mockBooksRepository.Setup(r => r.FindBookByIdAsync(id)).ReturnsAsync(mockBook);
 
         _uowMock.Setup(uow => uow.GetRepository<IBooksRepository>()).Returns(mockBooksRepository.Object);
 
@@ -69,7 +69,7 @@ public class GetBooksHandlerTests
         int nonExistentBookId = 999;
 
         var mockBooksRepository = new Mock<IBooksRepository>();
-        mockBooksRepository.Setup(r => r.GetBookByIdAsync(nonExistentBookId)).ThrowsAsync(new KeyNotFoundException());
+        mockBooksRepository.Setup(r => r.FindBookByIdAsync(nonExistentBookId)).ThrowsAsync(new KeyNotFoundException());
 
         _uowMock.Setup(uow => uow.GetRepository<IBooksRepository>()).Returns(mockBooksRepository.Object);
 

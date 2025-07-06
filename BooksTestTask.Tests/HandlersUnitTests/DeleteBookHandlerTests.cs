@@ -32,13 +32,13 @@ public class DeleteBookHandlerTests
         };
 
         var mockBooksRepository = new Mock<IBooksRepository>();
-        mockBooksRepository.Setup(r => r.GetBookByIdAsync(id)).ReturnsAsync(mockBook);
+        mockBooksRepository.Setup(r => r.FindBookByIdAsync(id)).ReturnsAsync(mockBook);
 
         _uowMock.Setup(uow => uow.GetRepository<IBooksRepository>()).Returns(mockBooksRepository.Object);
 
         await _deleteBookHandler.HandleAsync(id);
 
-        mockBooksRepository.Verify(r => r.GetBookByIdAsync(id), Times.Once());
+        mockBooksRepository.Verify(r => r.FindBookByIdAsync(id), Times.Once());
         mockBooksRepository.Verify(r => r.Delete(mockBook), Times.Once);
 
         _uowMock.Verify(uow => uow.SaveAsync(), Times.Once);

@@ -10,11 +10,9 @@ public class BooksRepository : BaseEfRepository<Book>, IBooksRepository
 {
     public BooksRepository(BooksDbContext booksDbContext, ILogger<BooksRepository> logger) : base(booksDbContext) { }
 
-    public async Task<Book> GetBookByIdAsync(int id)
+    public Task<Book?> FindBookByIdAsync(int id)
     {
-        var book = await DbSet.FirstOrDefaultAsync(x => x.Id == id);
-
-        return book is null ? throw new KeyNotFoundException() : book;
+        return DbSet.FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public Task<List<BookDto>> GetBooksAsync()
@@ -25,8 +23,23 @@ public class BooksRepository : BaseEfRepository<Book>, IBooksRepository
                 Id = b.Id,
                 Title = b.Title,
                 Author = b.Author,
-                Year = b.Year,
+                Year = b.Year
             })
             .ToListAsync();
+    }
+
+    public Task<BookDto?> GetBookAsync(int id)
+    {
+        return DbSet
+            .AsNoTracking()
+            .Where(b => b.Id == id)
+            .Select(b => new BookDto
+            {
+                Id = b.Id,
+                Title = b.Title,
+                Author = b.Author,
+                Year = b.Year
+            })
+            .FirstOrDefaultAsync();
     }
 }

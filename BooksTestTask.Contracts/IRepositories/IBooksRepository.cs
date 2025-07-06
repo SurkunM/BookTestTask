@@ -7,5 +7,7 @@ public interface IBooksRepository : IRepository<Book>
 {
     Task<List<BookDto>> GetBooksAsync();
 
-    Task<Book> GetBookByIdAsync(int id);
+    Task<Book?> FindBookByIdAsync(int id);
+
+    Task<BookDto?> GetBookAsync(int id);
 }
