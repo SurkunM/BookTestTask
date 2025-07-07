@@ -21,12 +21,10 @@ public class GetBooksHandler
         return booksRepository.GetBooksAsync();
     }
 
-    public async Task<BookDto> HandleAsync(int id)
+    public Task<BookDto?> HandleAsync(int id)
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
-        var bookDto = await booksRepository.GetBookByIdAsync(id);
-
-        return bookDto.ToDto();
+        return booksRepository.GetBookAsync(id);
     }
 }

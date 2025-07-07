@@ -14,12 +14,32 @@ public class UpdateBookHandler
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
-    public async Task HandleAsync(BookDto booksDto)
+    public async Task<bool> HandleAsync(BookDto booksDto)
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
-        booksRepository.Update(booksDto.ToModel());
+        try
+        {
+            _unitOfWork.BeginTransaction();
 
-        await _unitOfWork.SaveAsync();
+            var existingBook = await booksRepository.FindBookByIdAsync(booksDto.Id);
+
+            if (existingBook is null)
+            {
+                return false;
+            }
+
+            booksRepository.Update(booksDto.ToModel());
+
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+        catch (Exception)
+        {
+            _unitOfWork.RollbackTransaction();
+
+            throw;
+        }
     }
 }

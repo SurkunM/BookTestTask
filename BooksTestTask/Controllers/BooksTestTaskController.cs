@@ -52,6 +52,11 @@ public class BooksTestTaskController : ControllerBase
         {
             var result = await _getBooksHandler.HandleAsync(id);
 
+            if (result is null)
+            {
+                return NotFound();
+            }
+
             return Ok(result);
         }
         catch (Exception)
@@ -80,7 +85,12 @@ public class BooksTestTaskController : ControllerBase
     {
         try
         {
-            await _updateBookHandler.HandleAsync(booksDto);
+            var success = await _updateBookHandler.HandleAsync(booksDto);
+
+            if (!success)
+            {
+                return BadRequest("Книга не найдена");
+            }
 
             return NoContent();
         }
@@ -95,7 +105,12 @@ public class BooksTestTaskController : ControllerBase
     {
         try
         {
-            await _deleteBookHandler.HandleAsync(id);
+            var success = await _deleteBookHandler.HandleAsync(id);
+
+            if (!success)
+            {
+                return BadRequest("Книга не найдена");
+            }
 
             return NoContent();
         }

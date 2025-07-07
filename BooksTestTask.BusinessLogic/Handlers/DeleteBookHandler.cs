@@ -1,11 +1,5 @@
-﻿using BooksTestTask.Contracts.Dto;
-using BooksTestTask.Contracts.IRepositories;
+﻿using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BooksTestTask.BusinessLogic.Handlers;
 
@@ -19,14 +13,32 @@ public class DeleteBookHandler
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
-    public async Task HandleAsync(int id)
+    public async Task<bool> HandleAsync(int id)
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
-        var book = await booksRepository.GetBookByIdAsync(id);
+        try
+        {
+            _unitOfWork.BeginTransaction();
 
-        booksRepository.Delete(book);
+            var book = await booksRepository.FindBookByIdAsync(id);
 
-        await _unitOfWork.SaveAsync();
+            if (book is null)
+            {
+                return false;
+            }
+
+            booksRepository.Delete(book);
+
+            await _unitOfWork.SaveAsync();
+
+            return true;
+        }
+        catch (Exception)
+        {
+            _unitOfWork.RollbackTransaction();
+
+            throw;
+        }
     }
 }
