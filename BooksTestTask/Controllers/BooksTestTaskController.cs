@@ -33,90 +33,56 @@ public class BooksTestTaskController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetBooks()
     {
-        try
-        {
-            var result = await _getBooksHandler.HandleAsync();
+        var result = await _getBooksHandler.HandleAsync();
 
-            return Ok(result);
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ошибка сервера.");
-        }
+        return Ok(result);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetBook([FromBody] int id)
+    public async Task<IActionResult> GetBook(int id)
     {
-        try
-        {
-            var result = await _getBooksHandler.HandleAsync(id);
+        var result = await _getBooksHandler.HandleAsync(id);
 
-            if (result is null)
-            {
-                return NotFound();
-            }
-
-            return Ok(result);
-        }
-        catch (Exception)
+        if (result is null)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ошибка сервера.");
+            return NotFound();
         }
+
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateBook(BookDto booksDto)
     {
-        try
-        {
-            await _createBookHandler.HandleAsync(booksDto);
+        await _createBookHandler.HandleAsync(booksDto);
 
-            return NoContent();
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ошибка сервера.");
-        }
+        return NoContent();
     }
 
-    [HttpPost]
+    [HttpPut]
     public async Task<IActionResult> UpdateBook(BookDto booksDto)
     {
-        try
-        {
-            var success = await _updateBookHandler.HandleAsync(booksDto);
+        var success = await _updateBookHandler.HandleAsync(booksDto);
 
-            if (!success)
-            {
-                return BadRequest("Книга не найдена");
-            }
-
-            return NoContent();
-        }
-        catch (Exception)
+        if (!success)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ошибка сервера.");
+            return BadRequest("Книга не найдена");
         }
+
+        return NoContent();
     }
 
     [HttpDelete]
     public async Task<IActionResult> DeleteBook([FromBody] int id)
     {
-        try
-        {
-            var success = await _deleteBookHandler.HandleAsync(id);
 
-            if (!success)
-            {
-                return BadRequest("Книга не найдена");
-            }
+        var success = await _deleteBookHandler.HandleAsync(id);
 
-            return NoContent();
-        }
-        catch (Exception)
+        if (!success)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ошибка сервера.");
+            return BadRequest("Книга не найдена");
         }
+
+        return NoContent();
     }
 }

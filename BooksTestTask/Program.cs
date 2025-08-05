@@ -1,4 +1,5 @@
 using BooksTestTask.BusinessLogic.Handlers;
+using BooksTestTask.BusinessLogic.Middleware;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
 using BooksTestTask.DataAccess;
@@ -64,6 +65,8 @@ public class Program
 
         app.UseAuthorization();
 
+        app.UseMiddleware<ExceptionMiddleware>();
+        app.UseRouting();
         app.MapControllers();
 
         app.Run();

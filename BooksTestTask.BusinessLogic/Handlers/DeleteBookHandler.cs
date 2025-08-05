@@ -25,6 +25,8 @@ public class DeleteBookHandler
 
             if (book is null)
             {
+                _unitOfWork.RollbackTransaction();
+
                 return false;
             }
 

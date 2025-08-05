@@ -26,6 +26,8 @@ public class UpdateBookHandler
 
             if (existingBook is null)
             {
+                _unitOfWork.RollbackTransaction();
+
                 return false;
             }
 
