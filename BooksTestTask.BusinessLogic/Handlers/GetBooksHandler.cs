@@ -1,5 +1,5 @@
 ﻿using BooksTestTask.Contracts.Dto;
-using BooksTestTask.Contracts.Extensions;
+using BooksTestTask.Contracts.Exceptions;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
 
@@ -21,10 +21,12 @@ public class GetBooksHandler
         return booksRepository.GetBooksAsync();
     }
 
-    public Task<BookDto?> HandleAsync(int id)
+    public async Task<BookDto> HandleAsync(int id)
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
-        return booksRepository.GetBookAsync(id);
+        var book = await booksRepository.GetBookAsync(id);
+
+        return book is null ? throw new NotFoundException("Книга не найдена") : book;
     }
 }

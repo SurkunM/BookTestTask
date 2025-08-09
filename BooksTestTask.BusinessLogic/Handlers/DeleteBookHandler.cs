@@ -1,8 +1,8 @@
-﻿using BooksTestTask.Contracts.IRepositories;
+﻿using BooksTestTask.Contracts.Exceptions;
+using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
 
 namespace BooksTestTask.BusinessLogic.Handlers;
-
 
 public class DeleteBookHandler
 {
@@ -13,7 +13,7 @@ public class DeleteBookHandler
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
-    public async Task<bool> HandleAsync(int id)
+    public async Task HandleAsync(int id)
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
@@ -27,14 +27,12 @@ public class DeleteBookHandler
             {
                 _unitOfWork.RollbackTransaction();
 
-                return false;
+                throw new NotFoundException("Книга не найдена");
             }
 
             booksRepository.Delete(book);
 
             await _unitOfWork.SaveAsync();
-
-            return true;
         }
         catch (Exception)
         {

@@ -1,4 +1,5 @@
 ﻿using BooksTestTask.Contracts.Dto;
+using BooksTestTask.Contracts.Exceptions;
 using BooksTestTask.Contracts.Extensions;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
@@ -14,7 +15,7 @@ public class UpdateBookHandler
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
-    public async Task<bool> HandleAsync(BookDto booksDto)
+    public async Task HandleAsync(BookDto booksDto)
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
@@ -28,14 +29,12 @@ public class UpdateBookHandler
             {
                 _unitOfWork.RollbackTransaction();
 
-                return false;
+                throw new NotFoundException("Книга не найдена");
             }
 
             booksRepository.Update(booksDto.ToModel());
 
             await _unitOfWork.SaveAsync();
-
-            return true;
         }
         catch (Exception)
         {

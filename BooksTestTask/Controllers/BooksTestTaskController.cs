@@ -43,11 +43,6 @@ public class BooksTestTaskController : ControllerBase
     {
         var result = await _getBooksHandler.HandleAsync(id);
 
-        if (result is null)
-        {
-            return NotFound();
-        }
-
         return Ok(result);
     }
 
@@ -62,12 +57,7 @@ public class BooksTestTaskController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> UpdateBook(BookDto booksDto)
     {
-        var success = await _updateBookHandler.HandleAsync(booksDto);
-
-        if (!success)
-        {
-            return BadRequest("Книга не найдена");
-        }
+        await _updateBookHandler.HandleAsync(booksDto);
 
         return NoContent();
     }
@@ -75,13 +65,7 @@ public class BooksTestTaskController : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> DeleteBook([FromBody] int id)
     {
-
-        var success = await _deleteBookHandler.HandleAsync(id);
-
-        if (!success)
-        {
-            return BadRequest("Книга не найдена");
-        }
+        await _deleteBookHandler.HandleAsync(id);
 
         return NoContent();
     }
