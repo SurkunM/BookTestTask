@@ -1,4 +1,4 @@
-﻿using BooksTestTask.BusinessLogic.Handlers;
+﻿using BooksTestTask.BusinessLogic.Handlers.Book;
 using BooksTestTask.Contracts.Dto;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,7 +6,7 @@ namespace BooksTestTask.Controllers;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-public class BooksTestTaskController : ControllerBase
+public class BooksController : ControllerBase
 {
     private readonly CreateBookHandler _createBookHandler;
 
@@ -16,9 +16,9 @@ public class BooksTestTaskController : ControllerBase
 
     private readonly DeleteBookHandler _deleteBookHandler;
 
-    private readonly ILogger<BooksTestTaskController> _logger;
+    private readonly ILogger<BooksController> _logger;
 
-    public BooksTestTaskController(ILogger<BooksTestTaskController> logger,
+    public BooksController(ILogger<BooksController> logger,
         CreateBookHandler createBookHandler, GetBooksHandler getBooksHandler,
         UpdateBookHandler updateBookHandler, DeleteBookHandler deleteBookHandler)
     {
