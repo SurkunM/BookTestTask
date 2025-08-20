@@ -3,7 +3,7 @@ using BooksTestTask.Contracts.Extensions;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
 
-namespace BooksTestTask.BusinessLogic.Handlers;
+namespace BooksTestTask.BusinessLogic.Handlers.Book;
 
 public class CreateBookHandler
 {
@@ -18,7 +18,7 @@ public class CreateBookHandler
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
-        await booksRepository.CreateAsync(booksDto.ToModel());
+        await booksRepository.CreateAsync(booksDto.ToBookModel());
 
         await _unitOfWork.SaveAsync();
     }

@@ -1,19 +1,21 @@
-﻿using BooksTestTask.Contracts.Exceptions;
+﻿using BooksTestTask.Contracts.Dto;
+using BooksTestTask.Contracts.Exceptions;
+using BooksTestTask.Contracts.Extensions;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
 
-namespace BooksTestTask.BusinessLogic.Handlers;
+namespace BooksTestTask.BusinessLogic.Handlers.Book;
 
-public class DeleteBookHandler
+public class UpdateBookHandler
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteBookHandler(IUnitOfWork unitOfWork)
+    public UpdateBookHandler(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
     }
 
-    public async Task HandleAsync(int id)
+    public async Task HandleAsync(BookDto booksDto)
     {
         var booksRepository = _unitOfWork.GetRepository<IBooksRepository>();
 
@@ -21,16 +23,16 @@ public class DeleteBookHandler
         {
             _unitOfWork.BeginTransaction();
 
-            var book = await booksRepository.FindBookByIdAsync(id);
+            var existingBook = await booksRepository.FindBookByIdAsync(booksDto.Id);
 
-            if (book is null)
+            if (existingBook is null)
             {
                 _unitOfWork.RollbackTransaction();
 
                 throw new NotFoundException("Книга не найдена");
             }
 
-            booksRepository.Delete(book);
+            booksRepository.Update(booksDto.ToBookModel());
 
             await _unitOfWork.SaveAsync();
         }

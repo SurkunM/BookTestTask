@@ -3,7 +3,7 @@ using BooksTestTask.Contracts.Exceptions;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
 
-namespace BooksTestTask.BusinessLogic.Handlers;
+namespace BooksTestTask.BusinessLogic.Handlers.Book;
 
 public class GetBooksHandler
 {
