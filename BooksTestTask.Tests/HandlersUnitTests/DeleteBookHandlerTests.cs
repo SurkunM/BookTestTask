@@ -1,4 +1,4 @@
-﻿using BooksTestTask.BusinessLogic.Handlers;
+﻿using BooksTestTask.BusinessLogic.Handlers.Book;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
 using BooksTestTask.Model;
