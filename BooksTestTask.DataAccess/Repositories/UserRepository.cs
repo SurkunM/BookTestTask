@@ -10,10 +10,10 @@ public class UserRepository : BaseEfRepository<User>, IUserRepository
     {
     }
 
-    public Task<User> GetByEmail(string email)
+    public Task<User?> GetByEmailAsync(string email)
     {
         return DbSet
             .AsNoTracking()
-            .FirstAsync(u => u.Email == email);
+            .FirstOrDefaultAsync(u => u.Email == email);
     }
 }

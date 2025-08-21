@@ -5,7 +5,7 @@ namespace BooksTestTask.Contracts.Extensions;
 
 public static class MappingExtensions
 {
-    public static Book ToModel(this BookDto bookDto)
+    public static Book ToBookModel(this BookDto bookDto)
     {
         return new Book
         {
@@ -16,7 +16,7 @@ public static class MappingExtensions
         };
     }
 
-    public static BookDto ToDto(this Book book)
+    public static BookDto ToBookDto(this Book book)
     {
         return new BookDto
         {
@@ -24,6 +24,17 @@ public static class MappingExtensions
             Author = book.Author,
             Title = book.Title,
             Year = book.Year
+        };
+    }
+
+    public static User ToUserModel(this RegisterUserRequest request, string hashedPassword)
+    {
+        return new User
+        {
+            Id = Guid.NewGuid(),
+            UserName = request.UserName,
+            Email = request.Email,
+            PasswordHash = hashedPassword
         };
     }
 }
