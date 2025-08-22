@@ -8,7 +8,11 @@ using BooksTestTask.Contracts.IUnitOfWork;
 using BooksTestTask.DataAccess;
 using BooksTestTask.DataAccess.Repositories;
 using BooksTestTask.DataAccess.UnitOfWork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace BooksTestTask;
 
@@ -32,6 +36,7 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddScoped<DbContext>(provider => provider.GetRequiredService<BooksDbContext>());
+        builder.Services.AddTransient<JwtProvider>();
 
         builder.Services.AddTransient<IBooksRepository, BooksRepository>();
         builder.Services.AddTransient<IUserRepository, UserRepository>();
@@ -45,6 +50,37 @@ public class Program
 
         builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
         builder.Services.AddTransient<JwtProvider>();
+
+        var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters = new()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["TestCookies"];
+
+                        return Task.CompletedTask;
+                    }
+                };
+            })
+            .AddCookie(options =>
+             {
+                 options.Cookie.HttpOnly = true;
+                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                 options.Cookie.SameSite = SameSiteMode.Strict;
+             });
 
         var app = builder.Build();
 
@@ -72,10 +108,12 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseRouting();
+
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.UseMiddleware<ExceptionMiddleware>();
-        app.UseRouting();
         app.MapControllers();
 
         app.Run();

@@ -24,10 +24,12 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Login(LoginUserRequest request)
+    public async Task<IActionResult> Login(LoginUserRequest request)
     {
-        var token = _createUserHandler.Login(request);
+        var token = await _createUserHandler.Login(request);
 
-        return Ok(token.Result);
+        HttpContext.Response.Cookies.Append("TestCookies", token);
+
+        return Ok(token);
     }
 }
