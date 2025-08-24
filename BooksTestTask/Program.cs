@@ -9,8 +9,8 @@ using BooksTestTask.DataAccess;
 using BooksTestTask.DataAccess.Repositories;
 using BooksTestTask.DataAccess.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -21,35 +21,6 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        builder.Services.AddDbContext<BooksDbContext>(options =>
-        {
-            options
-                .UseSqlServer(builder.Configuration.GetConnectionString("BooksTestTaskConnection"))
-                .UseLazyLoadingProxies();
-        }, ServiceLifetime.Scoped, ServiceLifetime.Transient);
-
-        builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
-
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.AddScoped<DbContext>(provider => provider.GetRequiredService<BooksDbContext>());
-        builder.Services.AddTransient<JwtProvider>();
-
-        builder.Services.AddTransient<IBooksRepository, BooksRepository>();
-        builder.Services.AddTransient<IUserRepository, UserRepository>();
-
-        builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-        builder.Services.AddTransient<CreateBookHandler>();
-        builder.Services.AddTransient<DeleteBookHandler>();
-        builder.Services.AddTransient<GetBooksHandler>();
-        builder.Services.AddTransient<UpdateBookHandler>();
-        builder.Services.AddTransient<CreateUserHandler>();
-
-        builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
-        builder.Services.AddTransient<JwtProvider>();
 
         var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
 
@@ -76,11 +47,43 @@ public class Program
                 };
             })
             .AddCookie(options =>
-             {
-                 options.Cookie.HttpOnly = true;
-                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                 options.Cookie.SameSite = SameSiteMode.Strict;
-             });
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+            });
+
+        builder.Services.AddAuthorization();
+
+        builder.Services.AddDbContext<BooksDbContext>(options =>
+        {
+            options
+                .UseSqlServer(builder.Configuration.GetConnectionString("BooksTestTaskConnection"))
+                .UseLazyLoadingProxies();
+        }, ServiceLifetime.Scoped, ServiceLifetime.Transient);
+
+        builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
+        builder.Services.Configure<AuthorizationOptions>(builder.Configuration.GetSection("AuthorizationOptions"));
+
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        builder.Services.AddScoped<DbContext>(provider => provider.GetRequiredService<BooksDbContext>());
+        builder.Services.AddTransient<JwtProvider>();
+
+        builder.Services.AddTransient<IBooksRepository, BooksRepository>();
+        builder.Services.AddTransient<IUserRepository, UserRepository>();
+
+        builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+        builder.Services.AddTransient<CreateBookHandler>();
+        builder.Services.AddTransient<DeleteBookHandler>();
+        builder.Services.AddTransient<GetBooksHandler>();
+        builder.Services.AddTransient<UpdateBookHandler>();
+        builder.Services.AddTransient<AuthenticationUserHandler>();
+
+        builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
+        builder.Services.AddTransient<JwtProvider>();
 
         var app = builder.Build();
 
@@ -109,11 +112,11 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseRouting();
+        app.UseMiddleware<ExceptionMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();
 
-        app.UseMiddleware<ExceptionMiddleware>();
         app.MapControllers();
 
         app.Run();

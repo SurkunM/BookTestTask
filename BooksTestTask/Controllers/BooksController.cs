@@ -1,5 +1,6 @@
 ﻿using BooksTestTask.BusinessLogic.Handlers.Book;
 using BooksTestTask.Contracts.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BooksTestTask.Controllers;
@@ -31,6 +32,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetBooks()
     {
         var result = await _getBooksHandler.HandleAsync();
@@ -39,6 +41,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = "AdminPolicy")]
     public async Task<IActionResult> GetBook(int id)
     {
         var result = await _getBooksHandler.HandleAsync(id);

@@ -8,9 +8,9 @@ namespace BooksTestTask.Controllers;
 [Route("api/[controller]/[action]")]
 public class UserController : ControllerBase
 {
-    private readonly CreateUserHandler _createUserHandler;
+    private readonly AuthenticationUserHandler _createUserHandler;
 
-    public UserController(CreateUserHandler createUserHandler)
+    public UserController(AuthenticationUserHandler createUserHandler)
     {
         _createUserHandler = createUserHandler ?? throw new ArgumentNullException(nameof(createUserHandler));
     }
