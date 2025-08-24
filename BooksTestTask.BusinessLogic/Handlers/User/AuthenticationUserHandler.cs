@@ -7,7 +7,7 @@ using BooksTestTask.Contracts.IUnitOfWork;
 
 namespace BooksTestTask.BusinessLogic.Handlers.User;
 
-public class CreateUserHandler
+public class AuthenticationUserHandler
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -15,7 +15,7 @@ public class CreateUserHandler
 
     private readonly JwtProvider _jwtProvider;
 
-    public CreateUserHandler(IUnitOfWork unitOfWork, IPasswordHasher password, JwtProvider jwtProvider)
+    public AuthenticationUserHandler(IUnitOfWork unitOfWork, IPasswordHasher password, JwtProvider jwtProvider)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = password ?? throw new ArgumentNullException(nameof(password));
