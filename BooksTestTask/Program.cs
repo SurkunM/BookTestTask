@@ -8,19 +8,28 @@ using BooksTestTask.Contracts.IUnitOfWork;
 using BooksTestTask.DataAccess;
 using BooksTestTask.DataAccess.Repositories;
 using BooksTestTask.DataAccess.UnitOfWork;
+using BooksTestTask.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BooksTestTask;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddDbContext<BooksDbContext>(options =>
+        {
+            options
+                .UseSqlServer(builder.Configuration.GetConnectionString("BooksTestTaskConnection"))
+                .UseLazyLoadingProxies();
+        }, ServiceLifetime.Scoped, ServiceLifetime.Transient);
 
         var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
 
@@ -33,7 +42,7 @@ public class Program
                     ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions!.SecretKey))
                 };
 
                 options.Events = new JwtBearerEvents
@@ -53,17 +62,26 @@ public class Program
                 options.Cookie.SameSite = SameSiteMode.Strict;
             });
 
-        builder.Services.AddAuthorization();
-
-        builder.Services.AddDbContext<BooksDbContext>(options =>
+        builder.Services.AddDefaultIdentity<UserEntity>(options =>
         {
-            options
-                .UseSqlServer(builder.Configuration.GetConnectionString("BooksTestTaskConnection"))
-                .UseLazyLoadingProxies();
-        }, ServiceLifetime.Scoped, ServiceLifetime.Transient);
+            options.SignIn.RequireConfirmedAccount = false;
+        })
+        .AddRoles<IdentityRole>()
+        .AddEntityFrameworkStores<BooksDbContext>();
+
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("CreateBook", policy =>
+                policy.RequireRole("Admin"))
+            .AddPolicy("Authenticated", policy =>
+                policy.RequireAuthenticatedUser())
+            .AddPolicy("AdminOrUser", policy =>
+                policy.RequireRole("Admin", "User"))
+            .AddPolicy("UpdateBook", policy =>
+                policy.RequireRole("Admin"))
+            .AddPolicy("DeleteBook", policy =>
+                policy.RequireRole("Admin"));
 
         builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
-        builder.Services.Configure<AuthorizationOptions>(builder.Configuration.GetSection("AuthorizationOptions"));
 
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
@@ -84,6 +102,7 @@ public class Program
 
         builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
         builder.Services.AddTransient<JwtProvider>();
+        builder.Services.AddScoped<DbInitializer>();
 
         var app = builder.Build();
 
@@ -91,8 +110,9 @@ public class Program
         {
             try
             {
-                var dbInitializer = scope.ServiceProvider.GetRequiredService<BooksDbContext>();
-                dbInitializer.Database.Migrate();
+                var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
+                dbInitializer.Initialize();
+                await dbInitializer.SetRoles(scope.ServiceProvider);
             }
             catch (Exception ex)
             {
