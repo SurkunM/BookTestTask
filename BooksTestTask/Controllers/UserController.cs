@@ -32,4 +32,13 @@ public class UserController : ControllerBase
 
         return Ok(token);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> SetRole(string email, string role)
+    {
+        _createUserHandler.SetRolesToUser(email, role);
+
+        return Ok();
+    }
+
 }

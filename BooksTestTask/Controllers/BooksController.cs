@@ -1,5 +1,6 @@
 ﻿using BooksTestTask.BusinessLogic.Handlers.Book;
 using BooksTestTask.Contracts.Dto;
+using BooksTestTask.Model.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +33,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [Authorize(Policy = "Authenticated")]
     public async Task<IActionResult> GetBooks()
     {
         var result = await _getBooksHandler.HandleAsync();
@@ -41,7 +42,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "AdminPolicy")]
+    [Authorize(Policy = "AdminOrUser")]
     public async Task<IActionResult> GetBook(int id)
     {
         var result = await _getBooksHandler.HandleAsync(id);
@@ -50,6 +51,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "CreateBook")]
     public async Task<IActionResult> CreateBook(BookDto booksDto)
     {
         await _createBookHandler.HandleAsync(booksDto);
@@ -58,6 +60,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPut]
+    [Authorize(Policy = "UpdateBook")]
     public async Task<IActionResult> UpdateBook(BookDto booksDto)
     {
         await _updateBookHandler.HandleAsync(booksDto);
@@ -66,6 +69,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpDelete]
+    [Authorize(Policy = "DeleteBook")]
     public async Task<IActionResult> DeleteBook([FromBody] int id)
     {
         await _deleteBookHandler.HandleAsync(id);
