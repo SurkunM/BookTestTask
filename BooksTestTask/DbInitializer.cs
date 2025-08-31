@@ -37,16 +37,20 @@ public class DbInitializer
 
         var adminUser = new UserEntity
         {
+            Id = Guid.NewGuid(),
             UserName = "admin",
             Email = "admin@example.com",
-            Login = "Administrator"
+            Login = "Administrator",
+            PasswordHash = "123"
         };
 
         var user = new UserEntity
         {
+            Id = Guid.NewGuid(),
             UserName = "user1",
             Email = "user@example.com",
-            Login = "user123"
+            Login = "user123",
+            PasswordHash = "123"
         };
 
         var userManager = serviceProvider.GetRequiredService<UserManager<UserEntity>>();

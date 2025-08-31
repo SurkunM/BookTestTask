@@ -1,10 +1,11 @@
 ﻿using BooksTestTask.Model;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BooksTestTask.DataAccess;
 
-public class BooksDbContext : IdentityDbContext<UserEntity>
+public class BooksDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Guid>
 {
     public virtual DbSet<Book> Books { get; set; }
 
@@ -19,12 +20,6 @@ public class BooksDbContext : IdentityDbContext<UserEntity>
             b.Property(b => b.Title).HasMaxLength(50);
             b.Property(b => b.Author).HasMaxLength(50);
             b.Property(b => b.Year).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<UserEntity>(b =>
-        {
-            b.Property(b => b.UserName).HasMaxLength(50);
-            b.Property(b => b.Email).HasMaxLength(50);
         });
     }
 }

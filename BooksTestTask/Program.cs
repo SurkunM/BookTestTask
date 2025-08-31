@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BooksTestTask;
 
@@ -31,9 +30,24 @@ public class Program
                 .UseLazyLoadingProxies();
         }, ServiceLifetime.Scoped, ServiceLifetime.Transient);
 
+        builder.Services
+            .AddIdentity<UserEntity, IdentityRole<Guid>>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+            })
+            .AddRoles<IdentityRole<Guid>>()
+            .AddDefaultTokenProviders()
+            .AddEntityFrameworkStores<BooksDbContext>();
+
         var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
 
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        builder.Services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.TokenValidationParameters = new()
@@ -62,14 +76,8 @@ public class Program
                 options.Cookie.SameSite = SameSiteMode.Strict;
             });
 
-        builder.Services.AddDefaultIdentity<UserEntity>(options =>
-        {
-            options.SignIn.RequireConfirmedAccount = false;
-        })
-        .AddRoles<IdentityRole>()
-        .AddEntityFrameworkStores<BooksDbContext>();
-
-        builder.Services.AddAuthorizationBuilder()
+        builder.Services
+            .AddAuthorizationBuilder()
             .AddPolicy("CreateBook", policy =>
                 policy.RequireRole("Admin"))
             .AddPolicy("Authenticated", policy =>
@@ -112,7 +120,6 @@ public class Program
             {
                 var dbInitializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
                 dbInitializer.Initialize();
-                await dbInitializer.SetRoles(scope.ServiceProvider);
             }
             catch (Exception ex)
             {
