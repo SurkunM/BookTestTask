@@ -38,6 +38,9 @@ public class ExceptionMiddleware
             case NotFoundException:
                 context.Response.StatusCode = StatusCodes.Status404NotFound;
                 break;
+            case AuthenticationFailedException:
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                break;
             default:
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 response = new { error = "Внутренняя ошибка сервера" };

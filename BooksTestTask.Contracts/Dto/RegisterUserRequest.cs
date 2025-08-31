@@ -4,7 +4,7 @@ namespace BooksTestTask.Contracts.Dto;
 
 public class RegisterUserRequest
 {
-    int Id { get; set; }
+    public Guid Id { get; set; }
 
     [Required]
     public required string UserName { get; set; }
@@ -15,4 +15,7 @@ public class RegisterUserRequest
 
     [Required]
     public required string Email { get; set; }
+
+    [Required]
+    public required string Login { get; set; }
 }

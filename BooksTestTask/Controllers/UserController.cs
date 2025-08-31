@@ -1,5 +1,6 @@
 ﻿using BooksTestTask.BusinessLogic.Handlers.User;
 using BooksTestTask.Contracts.Dto;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BooksTestTask.Controllers;
@@ -28,13 +29,15 @@ public class UserController : ControllerBase
     {
         var token = await _createUserHandler.Login(request);
 
-        HttpContext.Response.Cookies.Append("TestCookies", token);
-
-        return Ok(token);
+        return Ok(new
+        {
+            Token = token,
+            ExpiresIn = 7200
+        });
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetRole(string email, string role)
+    public IActionResult SetRole(string email, string role)
     {
         _createUserHandler.SetRolesToUser(email, role);
 
