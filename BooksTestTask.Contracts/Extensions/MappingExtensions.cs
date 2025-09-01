@@ -1,5 +1,6 @@
 ﻿using BooksTestTask.Contracts.Dto;
 using BooksTestTask.Model;
+using BooksTestTask.Model.Identity;
 
 namespace BooksTestTask.Contracts.Extensions;
 
@@ -27,15 +28,14 @@ public static class MappingExtensions
         };
     }
 
-    public static UserEntity ToUserModel(this RegisterUserRequest request, string hashedPassword)
+    public static User ToUserModel(this RegisterUserRequest request, string hashedPassword)
     {
-        return new UserEntity
+        return new User
         {
             Id = request.Id,
             UserName = request.UserName,
             Email = request.Email,
-            PasswordHash = hashedPassword,
-            Login = request.Login
+            PasswordHash = hashedPassword
         };
     }
 }

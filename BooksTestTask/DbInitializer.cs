@@ -1,59 +1,75 @@
 ﻿using BooksTestTask.DataAccess;
-using BooksTestTask.Model;
+using BooksTestTask.Model.Enums;
+using BooksTestTask.Model.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BooksTestTask;
 
-public class DbInitializer
+public static class DbInitializer
 {
-    private readonly BooksDbContext _dbContext;
-
-    public DbInitializer(BooksDbContext context)
+    public static async Task DbInitialize(this WebApplication app)
     {
-        _dbContext = context ?? throw new ArgumentNullException(nameof(context));
+        using var scope = app.Services.CreateScope();
+
+        try
+        {
+            var service = scope.ServiceProvider;
+
+            var booksDbContext = service.GetRequiredService<BooksDbContext>();
+            await booksDbContext.Database.MigrateAsync();
+
+            var identityDbContext = service.GetRequiredService<IdentityDbContext>();
+            await identityDbContext.Database.MigrateAsync();
+
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+
+            await SeedData(service);
+        }
+        catch (Exception ex)
+        {
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "При создании базы данных произошла ошибка.");
+
+            throw;
+        }
     }
 
-    public void Initialize()
+    private static async Task SeedData(IServiceProvider service)
     {
-        _dbContext.Database.Migrate();
-    }
-
-    public async Task SetRoles(IServiceProvider serviceProvider)
-    {
-        var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var roleManager = service.GetRequiredService<RoleManager<Role>>();
 
         if (roleManager.Roles.Any())
         {
             return;
         }
 
-        string[] roleNames = ["Admin", "User"];
+        var roleNames = Enum.GetNames<RolesEnum>();
 
         foreach (var roleName in roleNames)
         {
-            await roleManager.CreateAsync(new IdentityRole(roleName));
+            await roleManager.CreateAsync(new Role { Name = roleName });
         }
 
-        var adminUser = new UserEntity
+        var userManager = service.GetRequiredService<UserManager<User>>();
+
+        if (userManager.Users.Any())
         {
-            Id = Guid.NewGuid(),
+            return;
+        }
+
+        var adminUser = new User
+        {
             UserName = "admin",
-            Email = "admin@example.com",
-            Login = "Administrator",
-            PasswordHash = "123"
+            Email = "admin@example.com"
         };
 
-        var user = new UserEntity
+        var user = new User
         {
-            Id = Guid.NewGuid(),
             UserName = "user1",
-            Email = "user@example.com",
-            Login = "user123",
-            PasswordHash = "123"
+            Email = "user@example.com"
         };
-
-        var userManager = serviceProvider.GetRequiredService<UserManager<UserEntity>>();
 
         await userManager.CreateAsync(adminUser, "admin");
         await userManager.CreateAsync(user, "user");

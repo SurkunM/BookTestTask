@@ -4,10 +4,10 @@ using BooksTestTask.Contracts.Exceptions;
 using BooksTestTask.Contracts.Extensions;
 using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
-using BooksTestTask.Model;
 using Microsoft.AspNetCore.Identity;
+using BooksTestTask.Model.Identity;
 
-namespace BooksTestTask.BusinessLogic.Handlers.User;
+namespace BooksTestTask.BusinessLogic.Handlers.Users;
 
 public class AuthenticationUserHandler
 {
@@ -17,9 +17,9 @@ public class AuthenticationUserHandler
 
     private readonly JwtProvider _jwtProvider;
 
-    private readonly UserManager<UserEntity> _userManager;
+    private readonly UserManager<User> _userManager;
 
-    public AuthenticationUserHandler(IUnitOfWork unitOfWork, IPasswordHasher password, JwtProvider jwtProvider, UserManager<UserEntity> userManager)
+    public AuthenticationUserHandler(IUnitOfWork unitOfWork, IPasswordHasher password, JwtProvider jwtProvider, UserManager<User> userManager)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _passwordHasher = password ?? throw new ArgumentNullException(nameof(password));

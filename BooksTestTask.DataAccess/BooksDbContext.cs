@@ -1,11 +1,9 @@
 ﻿using BooksTestTask.Model;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BooksTestTask.DataAccess;
 
-public class BooksDbContext : IdentityDbContext<UserEntity, IdentityRole<Guid>, Guid>
+public class BooksDbContext : DbContext
 {
     public virtual DbSet<Book> Books { get; set; }
 

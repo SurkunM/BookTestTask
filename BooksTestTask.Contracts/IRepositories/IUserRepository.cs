@@ -1,8 +1,9 @@
 ﻿using BooksTestTask.Model;
+using BooksTestTask.Model.Identity;
 
 namespace BooksTestTask.Contracts.IRepositories;
 
-public interface IUserRepository : IRepository<UserEntity>
+public interface IUserRepository : IRepository<User>
 {
-    Task<UserEntity?> GetByEmailAsync(string email);
+    Task<User?> GetByEmailAsync(string email);
 }

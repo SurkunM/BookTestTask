@@ -1,4 +1,4 @@
-﻿using BooksTestTask.BusinessLogic.Handlers.User;
+﻿using BooksTestTask.BusinessLogic.Handlers.Users;
 using BooksTestTask.Contracts.Dto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

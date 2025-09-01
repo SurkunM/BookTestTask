@@ -1,5 +1,6 @@
 ﻿using BooksTestTask.Configuration;
 using BooksTestTask.Model;
+using BooksTestTask.Model.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -14,16 +15,16 @@ public class JwtProvider
 {
     private readonly JwtOptions _options;
 
-    private readonly UserManager<UserEntity> _userManager;
+    private readonly UserManager<User> _userManager;
 
-    public JwtProvider(IOptions<JwtOptions> options, UserManager<UserEntity> userManager)
+    public JwtProvider(IOptions<JwtOptions> options, UserManager<User> userManager)
     {
         _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
 
     }
 
-    public async Task<string> GenerateTokenAsync(UserEntity user)
+    public async Task<string> GenerateTokenAsync(User user)
     {
         var claims = new List<Claim>
         {

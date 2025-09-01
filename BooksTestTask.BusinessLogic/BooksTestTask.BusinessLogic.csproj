@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BooksTestTask.Contracts\BooksTestTask.Contracts.csproj" />
+    <ProjectReference Include="..\BooksTestTask.Model\BooksTestTask.Model.csproj" />
   </ItemGroup>
 
 </Project>
