@@ -8,7 +8,7 @@ namespace BooksTestTask;
 
 public static class DbInitializer
 {
-    public static async Task DbInitialize(this WebApplication app)
+    public static async Task BooksDbInitialize(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
 

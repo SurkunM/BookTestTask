@@ -41,8 +41,9 @@ public class Program
         builder.Services
             .AddIdentity<User, Role>(options => options.SignIn.RequireConfirmedAccount = false)
             .AddEntityFrameworkStores<IdentityDbContext>()
+            .AddUserManager<UserManager<User>>()
+            .AddRoleManager<RoleManager<Role>>()
             .AddSignInManager<SignInManager<User>>()
-            .AddRoleManager<SignInManager<Role>>()
             .AddDefaultTokenProviders();
 
         builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
@@ -115,7 +116,7 @@ public class Program
 
         var app = builder.Build();
 
-        await app.DbInitialize();
+        await app.BooksDbInitialize();
 
         if (app.Environment.IsDevelopment())
         {
