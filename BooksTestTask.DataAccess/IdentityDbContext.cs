@@ -14,20 +14,8 @@ public class IdentityDbContext : IdentityDbContext<User, Role, Guid, IdentityUse
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<User>(builder =>
-        {
-            builder.ToTable("Users");
-            builder.HasMany(x => x.UserRoles)
-                .WithOne()
-                .HasForeignKey(x => x.UserId)
-                .IsRequired()
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
         modelBuilder.Entity<UserRole>(builder =>
         {
-            builder.ToTable("UserRoles");
-            builder.HasKey(ur => new { ur.UserId, ur.RoleId });
             builder.HasOne(x => x.Role)
                 .WithMany(x => x.UserRoles)
                 .HasForeignKey(x => x.RoleId)
@@ -36,9 +24,12 @@ public class IdentityDbContext : IdentityDbContext<User, Role, Guid, IdentityUse
                 .WithMany(x => x.UserRoles)
                 .HasForeignKey(x => x.UserId)
                 .IsRequired();
+
+            builder.ToTable("UserRoles");
         });
 
         modelBuilder.Entity<Role>().ToTable("Roles");
+        modelBuilder.Entity<User>().ToTable("Users");
 
         modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
         modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
