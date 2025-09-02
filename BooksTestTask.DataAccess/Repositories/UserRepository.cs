@@ -1,17 +1,16 @@
-﻿using BooksTestTask.Contracts.Exceptions;
-using BooksTestTask.Contracts.IRepositories;
-using BooksTestTask.Model;
+﻿using BooksTestTask.Contracts.IRepositories;
+using BooksTestTask.Model.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BooksTestTask.DataAccess.Repositories;
 
-public class UserRepository : BaseEfRepository<UserEntity>, IUserRepository
+public class UserRepository : BaseEfRepository<User>, IUserRepository
 {
     public UserRepository(BooksDbContext booksDbContext) : base(booksDbContext)
     {
     }
 
-    public Task<UserEntity?> GetByEmailAsync(string email)
+    public Task<User?> GetByEmailAsync(string email)
     {
         return DbSet
             .AsNoTracking()

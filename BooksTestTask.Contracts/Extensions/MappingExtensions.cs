@@ -28,14 +28,13 @@ public static class MappingExtensions
         };
     }
 
-    public static User ToUserModel(this RegisterUserRequest request, string hashedPassword)
+    public static User ToUserModel(this RegisterUserRequest request)
     {
         return new User
         {
-            Id = request.Id,
             UserName = request.UserName,
             Email = request.Email,
-            PasswordHash = hashedPassword
+            PasswordHash = request.Password
         };
     }
 }

@@ -1,5 +1,4 @@
-﻿using BooksTestTask.Model;
-using BooksTestTask.Model.Identity;
+﻿using BooksTestTask.Model.Identity;
 
 namespace BooksTestTask.Contracts.IRepositories;
 

@@ -33,7 +33,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "Authenticated")]
+    [Authorize]
     public async Task<IActionResult> GetBooks()
     {
         var result = await _getBooksHandler.HandleAsync();
@@ -51,7 +51,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "CreateBook")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> CreateBook(BookDto booksDto)
     {
         await _createBookHandler.HandleAsync(booksDto);
@@ -60,7 +60,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpPut]
-    [Authorize(Policy = "UpdateBook")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateBook(BookDto booksDto)
     {
         await _updateBookHandler.HandleAsync(booksDto);
@@ -69,7 +69,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpDelete]
-    [Authorize(Policy = "DeleteBook")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteBook([FromBody] int id)
     {
         await _deleteBookHandler.HandleAsync(id);

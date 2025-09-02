@@ -1,6 +1,6 @@
 ﻿using BooksTestTask.BusinessLogic.Handlers.Users;
 using BooksTestTask.Contracts.Dto;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BooksTestTask.Controllers;
@@ -17,31 +17,20 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Register(RegisterUserRequest request)
     {
-        await _createUserHandler.Register(request);
+        var result = await _createUserHandler.Register(request);
 
-        return Ok();
+        return Ok(result);
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginUserRequest request)
     {
-        var token = await _createUserHandler.Login(request);
+        var result = await _createUserHandler.Login(request);
 
-        return Ok(new
-        {
-            Token = token,
-            ExpiresIn = 7200
-        });
+        return Ok(result);
     }
-
-    [HttpPost]
-    public IActionResult SetRole(string email, string role)
-    {
-        _createUserHandler.SetRolesToUser(email, role);
-
-        return Ok();
-    }
-
 }

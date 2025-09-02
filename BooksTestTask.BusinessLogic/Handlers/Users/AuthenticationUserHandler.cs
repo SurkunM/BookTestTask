@@ -1,11 +1,11 @@
 ﻿using BooksTestTask.BusinessLogic.Authentication;
 using BooksTestTask.Contracts.Dto;
+using BooksTestTask.Contracts.Dto.Responses;
 using BooksTestTask.Contracts.Exceptions;
 using BooksTestTask.Contracts.Extensions;
-using BooksTestTask.Contracts.IRepositories;
 using BooksTestTask.Contracts.IUnitOfWork;
-using Microsoft.AspNetCore.Identity;
 using BooksTestTask.Model.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace BooksTestTask.BusinessLogic.Handlers.Users;
 
@@ -13,25 +13,24 @@ public class AuthenticationUserHandler
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    private readonly IPasswordHasher _passwordHasher;
-
     private readonly JwtProvider _jwtProvider;
 
     private readonly UserManager<User> _userManager;
 
-    public AuthenticationUserHandler(IUnitOfWork unitOfWork, IPasswordHasher password, JwtProvider jwtProvider, UserManager<User> userManager)
+    private readonly SignInManager<User> _signInManager;
+
+    public AuthenticationUserHandler(IUnitOfWork unitOfWork, JwtProvider jwtProvider,
+        UserManager<User> userManager, SignInManager<User> signInManager)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _passwordHasher = password ?? throw new ArgumentNullException(nameof(password));
         _jwtProvider = jwtProvider ?? throw new ArgumentNullException(nameof(jwtProvider));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
     }
 
-    public async Task Register(RegisterUserRequest request)
+    public async Task<UserRegisterResponse> Register(RegisterUserRequest request)
     {
-        var hashedPassword = _passwordHasher.Generate(request.Password);
-
-        var user = request.ToUserModel(hashedPassword);
+        var user = request.ToUserModel();
 
         var result = await _userManager.CreateAsync(user);
 
@@ -40,38 +39,39 @@ public class AuthenticationUserHandler
             throw new Exception(result.Errors.ToString());
         }
 
-        await _userManager.AddToRoleAsync(user, "User");
+        await _userManager.AddToRoleAsync(user, "Admin");
 
-        await _jwtProvider.GenerateTokenAsync(user);
+        var token = await _jwtProvider.GenerateTokenAsync(user);
+
+        return new UserRegisterResponse()
+        {
+            UserName = user.UserName,
+            Token = token
+        };
     }
 
-    public async Task<string> Login(LoginUserRequest request)
+    public async Task<UserRegisterResponse> Login(LoginUserRequest request)
     {
-        var userRepository = _unitOfWork.GetRepository<IUserRepository>();
-
-        var user = await userRepository.GetByEmailAsync(request.Email);
+        var user = await _userManager.FindByEmailAsync(request.Email);
 
         if (user is null)
         {
             throw new NotFoundException($"Не найден юзер с Email:{request.Email}");
         }
 
-        var result = _passwordHasher.Verify(request.Password, user.PasswordHash);
+        var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
 
-        if (!result)
+        if (!result.Succeeded)
         {
             throw new AuthenticationFailedException("Не удалось авторизоваться");
         }
 
-        return await _jwtProvider.GenerateTokenAsync(user);
-    }
+        var token = await _jwtProvider.GenerateTokenAsync(user);
 
-    public void SetRolesToUser(string email, string role)
-    {
-        var userRepository = _unitOfWork.GetRepository<IUserRepository>();
-
-        //userRepository.SetRoles(email, role);
-
-        _unitOfWork.SaveAsync();
+        return new UserRegisterResponse()
+        {
+            UserName = user.UserName,
+            Token = token
+        };
     }
 }
