@@ -32,6 +32,8 @@ public class AuthenticationUserHandler
     {
         var user = request.ToUserModel();
 
+        user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, request.Password);
+
         var result = await _userManager.CreateAsync(user);
 
         if (!result.Succeeded)
@@ -56,7 +58,7 @@ public class AuthenticationUserHandler
 
         if (user is null)
         {
-            throw new NotFoundException($"Не найден юзер с Email:{request.Email}");
+            throw new NotFoundException("Неверный email или пароль");
         }
 
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);

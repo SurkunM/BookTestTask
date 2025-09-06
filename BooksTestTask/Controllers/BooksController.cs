@@ -33,7 +33,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    [Authorize(Roles = "User")]
     public async Task<IActionResult> GetBooks()
     {
         var result = await _getBooksHandler.HandleAsync();

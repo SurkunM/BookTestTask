@@ -33,8 +33,7 @@ public static class MappingExtensions
         return new User
         {
             UserName = request.UserName,
-            Email = request.Email,
-            PasswordHash = request.Password
+            Email = request.Email
         };
     }
 }
